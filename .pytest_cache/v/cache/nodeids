@@ -1,0 +1,7 @@
+[
+  "tests/test_eval.py::test_evalset_loaded",
+  "tests/test_eval.py::test_rule_assert",
+  "tests/test_eval.py::test_v1_exposes_stale_doc_badcase",
+  "tests/test_eval.py::test_v2_fixes_privacy_and_boundary",
+  "tests/test_eval.py::test_version_compare_metrics"
+]
