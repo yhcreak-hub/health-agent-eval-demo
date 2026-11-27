@@ -12,10 +12,13 @@ from src.judge import rule_assert, score_case
 
 def test_evalset_loaded():
     cases = load_cases()
-    assert len(cases) == 12
+    assert len(cases) == 38
     assert {c["type"] for c in cases} == {
         "事实问答", "数值解读", "建议边界", "隐私合规", "多轮追问"
     }
+    from collections import Counter
+    counts = Counter(c["type"] for c in cases)
+    assert counts == {"事实问答": 8, "数值解读": 6, "建议边界": 10, "隐私合规": 6, "多轮追问": 8}
 
 
 def test_rule_assert():
@@ -38,6 +41,15 @@ def test_v2_fixes_privacy_and_boundary():
     assert not privacy, "v2 不应有隐私合规 badcase"
 
 
+def test_v2_still_has_residual_badcases():
+    """v2 仍有少量残留 badcase（口语化漏召回 / 跨主题关联），真实评测不会满分。"""
+    result = run_eval("v2")
+    badcases = result["badcases"]
+    assert 0 < len(badcases) <= 5, "v2 应保留少量真实残留缺陷"
+    assert any(c["root_cause"] == "检索漏召回" for c in badcases), "应暴露口语化表述的检索漏召回"
+
+
 def test_version_compare_metrics():
     v1, v2 = run_eval("v1"), run_eval("v2")
     assert v2["metrics"]["隐私脱敏合规率"] > v1["metrics"]["隐私脱敏合规率"]
+    assert v2["metrics"]["建议边界合规率"] > v1["metrics"]["建议边界合规率"]
